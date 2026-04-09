@@ -12,6 +12,7 @@ animation_choice = st.selectbox(
         "Rotating 3D Helix",
         "Moving Sine Wave",
         "Bouncing Ball",
+        "Pulsing Heatmap",
     ],
 )
 
@@ -238,11 +239,63 @@ def bouncing_ball():
     return fig
 
 
+# new animation
+def pulsing_heatmap():
+    # Create a grid
+    x = np.linspace(-5, 5, 50)
+    y = np.linspace(-5, 5, 50)
+    X, Y = np.meshgrid(x, y)
+    R = np.sqrt(X**2 + Y**2)
+    
+    frames = []
+    for i in range(num_frames):
+        phase = 2 * np.pi * i / num_frames
+        # Create a ripple effect
+        Z = np.sin(R - phase)
+        
+        frames.append(
+            go.Frame(
+                data=[go.Heatmap(z=Z, x=x, y=y, colorscale="Viridis")],
+                name=str(i)
+            )
+        )
+        
+    fig = go.Figure(
+        data=[go.Heatmap(z=np.sin(R), x=x, y=y, colorscale="Viridis")],
+        frames=frames
+    )
+    
+    fig.update_layout(
+        title="Pulsing Heatmap (Radial Wave)",
+        updatemenus=[
+            {
+                "type": "buttons",
+                "buttons": [
+                    {
+                        "label": "Play",
+                        "method": "animate",
+                        "args": [None, {"frame": {"duration": 50, "redraw": True}, "fromcurrent": True}]
+                    },
+                    {
+                        "label": "Pause",
+                        "method": "animate",
+                        "args": [[None], {"frame": {"duration": 0, "redraw": False}, "mode": "immediate"}]
+                    },
+                ],
+            }
+        ],
+        margin=dict(l=0, r=0, t=50, b=0),
+    )
+    return fig
+
+# Router logic
 if animation_choice == "Rotating 3D Helix":
     fig = rotating_3d_helix()
 elif animation_choice == "Moving Sine Wave":
     fig = moving_sine_wave()
-else:
+elif animation_choice == "Bouncing Ball":
     fig = bouncing_ball()
+else:
+    fig = pulsing_heatmap()
 
 st.plotly_chart(fig, use_container_width=True)
