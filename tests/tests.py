@@ -78,3 +78,50 @@ def test_output_text_correct():
 
     # Check text value
     assert at.markdown[0].value == "Total count is 11"
+
+def test_button_increments_counter_hundred_x():
+    """Test that the increment button adds 100 in hundred_x mode."""
+    at = AppTest.from_file("app.py").run()
+    
+    at.session_state.count = 0
+    
+    # Activate hundred_x mode via the checkbox
+    at.checkbox(key="hundred_x").check().run()
+    
+    # Click the increment button
+    at.button(key="increment").click().run()
+    
+    # Assert the count went up by 100
+    assert at.session_state.count == 100
+
+def test_button_decrements_counter_hundred_x():
+    """Test that the decrement button subtracts 100 in hundred_x mode."""
+    at = AppTest.from_file("app.py").run()
+    
+    # Initialize high enough to subtract 100 safely
+    at.session_state.count = 150
+    
+    # Activate hundred_x mode via the checkbox
+    at.checkbox(key="hundred_x").check().run()
+    
+    # Click the decrement button
+    at.button(key="decrement").click().run()
+    
+    # Assert the count went down by 100
+    assert at.session_state.count == 50
+
+def test_button_decrements_counter_hundred_x_floors_at_zero():
+    """Test that subtracting 100 from a number smaller than 100 results in 0."""
+    at = AppTest.from_file("app.py").run()
+    
+    # Initialize at 50 so that subtracting 100 would result in a negative number
+    at.session_state.count = 50
+    
+    # Activate hundred_x mode
+    at.checkbox(key="hundred_x").check().run()
+    
+    # Click the decrement button
+    at.button(key="decrement").click().run()
+    
+    # Assert the count didn't go to -50, but stopped at 0
+    assert at.session_state.count == 0
